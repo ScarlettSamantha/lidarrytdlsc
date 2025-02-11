@@ -1,4 +1,6 @@
 python-dotenv
 flask
-aiopyarr
+requests
 yt-dlp
+rapidfuzz
+youtube-search-python
