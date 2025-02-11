@@ -1,0 +1,24 @@
+[project]
+# Basic metadata for the YubiKey Monitor package.
+name = "Lidarr-ytdl-sc"
+version = "0.1.0"
+description = "A tool to download data from lidarr from youtube"
+readme = "README.md"            
+requires-python = ">=3.10"
+license = { file = "MIT" }  
+authors = [
+    { name = "Scarlett Samantha Verheul", email = "scarlett.verheul@gmail.com" }  
+]
+# Classifiers help users and tools to categorize your project.
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
