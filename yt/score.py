@@ -2,10 +2,6 @@ from typing import Tuple
 from rapidfuzz import fuzz # pyright: ignore[reportMissingImports]
 import helper
 from models.video import VideoData
-import os
-import requests
-from PIL import Image
-from io import BytesIO
 
 
 def compare_video(
