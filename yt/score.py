@@ -13,6 +13,7 @@ def compare_video(
     boost_duration: int = 5,
     boost_viewers: int = 5,
     boost_cover: int = -10,
+    boost_per_10000: int = 1,
     min_time: int = 120,
     max_time: int = 600
 ) -> Tuple[float, str]:
@@ -67,6 +68,8 @@ def compare_video(
     # Boost if the video's view count exceeds the specified threshold
     if views > view_trashhold:
         score += boost_viewers
+        
+    score += views * boost_per_10000
 
     # Ensure the final score does not exceed 100
     return min(score, 100), video_title
