@@ -288,6 +288,7 @@ class VideoDownloader:
         if dest_name is None:
             raise ValueError("Destination file name (dest_name) cannot be None.")
 
+        dest_name = dest_name if dest_name.endswith(".mp3") else f"{dest_name}.mp3"
         dest_path = os.path.abspath(os.path.join(destination, dest_name))
         self.logger.info("Moving file from %s to %s", src, dest_path)
         helper.safe_copy(src, dest_path)
@@ -323,6 +324,8 @@ class VideoDownloader:
             detect_and_update_tags(f"{self.tmp_file_path}")
 
         if dest_dir or self.dest_dir:
+            if not title.endswith(".mp3"):
+                title = title + ".mp3"
             final_path = self.move_audio(self.tmp_file_path, dest_dir, title, True)
             return final_path
         else:
