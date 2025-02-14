@@ -88,7 +88,7 @@ class VideoDownloader:
         :param title: Title of the video to search.
         :return: Tuple (best_video, best_score)
         """
-        results = search_youtube_unofficial(title)
+        results = search_youtube_unofficial(title, 20)
         logger = self.logger.getChild("matcher")
         # Its json
         if isinstance(results, str):
