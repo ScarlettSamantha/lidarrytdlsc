@@ -1,8 +1,12 @@
 # ws/handle.py
 import time
 from pprint import pprint
+from typing import TYPE_CHECKING, Any
 from flask import current_app, json, g
 from flask_socketio import emit
+
+if TYPE_CHECKING:
+    from gui.app.todo_queue import todo_queue as TodoQueueType
 
 
 def register_sockets(socketio):
@@ -11,8 +15,7 @@ def register_sockets(socketio):
         selected_ids = data.get('selected_id', [])
         action = data.get('action', '')
         print(f"[WS] export_selected_rows: selected_ids={selected_ids}, action={action}")
-        todo_queue = current_app.config.get('todo_queue')
-        print(todo_queue)
+        todo_queue: TodoQueueType | Any = current_app.config.get('todo_queue')
         for id in selected_ids:
             todo_queue.items.append(id)
         pprint(todo_queue)

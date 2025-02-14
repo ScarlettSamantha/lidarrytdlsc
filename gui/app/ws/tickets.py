@@ -1,7 +1,8 @@
 from main import socketio
+from flask import current_app
 import random
 
-def increment_ticket_progress(ticket_id, rate, table_rows):
+def increment_ticket_progress(ticket_id, rate):
     """
     Increment the progress of the ticket (row) with the given UUID until it reaches 100.
     Each increment occurs after 'rate' seconds and increases progress by a random amount.
@@ -15,7 +16,7 @@ def increment_ticket_progress(ticket_id, rate, table_rows):
         if progress > 100:
             progress = 100
         # Update the corresponding row's progress.
-        for row in table_rows:
+        for row in current_app.config['table']:
             if row['id'] == ticket_id:
                 row['progress'] = progress
                 break

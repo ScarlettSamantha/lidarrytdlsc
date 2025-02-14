@@ -15,7 +15,6 @@ def seed_rows() -> List[Dict[str, Any]]:
     table_rows = []
     for i in range(300):
         row_uuid = str(uuid.uuid4())
-        # Include a progress field (initially 0) along with other cells.
         row = {"id": row_uuid, "value": str(i), "progress": 0}
         table_rows.append(row)
     return table_rows

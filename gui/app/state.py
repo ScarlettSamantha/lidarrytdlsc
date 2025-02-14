@@ -20,8 +20,6 @@ class TableStateContainer(StateContainer):
         """Return the list of columns (as dictionaries)."""
         return self.columns
 
-    # --- Column CRUD operations ---
-
     def add_column(self, id: str, default: Any = None, raw: bool = False) -> None:
         """Create a new column with an optional default value and raw flag for existing rows."""
         if any(col["id"] == id for col in self.columns):
@@ -67,7 +65,6 @@ class TableStateContainer(StateContainer):
         for row in self.data_mapping:
             row.pop(index)
 
-    # --- Row CRUD operations ---
 
     def add_row(self, row_data: Dict[str, Any]) -> None:
         """
@@ -138,8 +135,6 @@ class TableStateContainer(StateContainer):
         """Return all rows as a list of dictionaries."""
         return [dict(zip([col["id"] for col in self.columns], row)) for row in self.data_mapping]
 
-# --- Seed Functions ---
-
 def seed_columns() -> List[Dict[str, Any]]:
     """
     Seed initial columns.  
@@ -170,8 +165,6 @@ def seed_rows(columns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 row[col["id"]] = col["id"]
         table_rows.append(row)
     return table_rows
-
-# --- Example Usage ---
 
 if __name__ == "__main__":
     table = TableStateContainer()
