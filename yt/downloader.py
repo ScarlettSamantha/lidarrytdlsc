@@ -45,7 +45,7 @@ def interactive_prompt():
                           if str(bitrate) in audio_quality_choice][0])
     audio_quality = str(selected_bitrate)
 
-    tmp_dir = questionary.text("Enter temporary directory:", default="/tmp").ask()
+    tmp_dir = questionary.text("Enter temporary directory:", default="tmp/progress").ask()
     dest_dir = questionary.text("Enter destination directory (leave empty for none):", default="tmp/ready").ask()
     if dest_dir.strip() == "":
         dest_dir = None
@@ -266,8 +266,8 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Audio Downloader Application using yt-dlp")
     parser.add_argument("title", nargs="?", help="Title of the video to search and download")
-    parser.add_argument("--tmp_dir", default="tmp/progress", help="Temporary directory for downloads (default: /tmp)")
-    parser.add_argument("--dest_dir", default="tmp/ready", help="Destination directory for the final audio file")
+    parser.add_argument("--tmp_dir", default="tmp/progress", help="Temporary directory for downloads (default: tmp/progress)")
+    parser.add_argument("--dest_dir", default="tmp/ready", help="Destination directory for the final audio file (default: tmp/ready)")
     parser.add_argument("--audio_quality", default=320, help="Audio quality preset (320,192,128) for extraction")
     parser.add_argument("--interactive", action="store_true", help="Run interactive CLI mode")
     args = parser.parse_args()
