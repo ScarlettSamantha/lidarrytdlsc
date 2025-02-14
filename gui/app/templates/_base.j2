@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Socket.IO CDN -->
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-900 text-gray-100">
+  {% with user=user %}
+    {% include 'partials/navbar.j2' %}
+  {% endwith %}
+  
+  <div class="flex pt-20">
+    {% include 'partials/sidebar.j2' %}
+    
+    <main class="ml-64 flex-1 p-6">
+      {% block content %}
+      {% endblock %}
+    </main>
+  </div>
+  
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+  
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <!-- Custom JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/table.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/style_force.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Socket.IO CDN -->
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="bg-gray-900 text-gray-100">
+  <!-- Top Navbar -->
+  <nav class="bg-gradient-to-r from-gray-800 to-gray-900 fixed w-full z-20 top-0 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <!-- Left: Logo & Search Bar -->
+      <div class="flex items-center space-x-4">
+        <div class="text-2xl font-bold">My Dashboard</div>
+        <div class="hidden sm:block">
+          <input type="text" placeholder="Search..." class="px-3 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+      <!-- Right: Notification, Column Buttons, User Dropdown -->
+      <div class="flex items-center space-x-4">
+        <!-- Notification Icon & Dropdown -->
+        <div class="relative">
+          <button id="notification-button" class="relative focus:outline-none">
+            <span class="material-icons text-white text-2xl">notifications</span>
+            <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">0</span>
+          </button>
+          <div id="notification-menu" class="hidden absolute right-0 mt-2 w-80 bg-gray-800 rounded-lg shadow-lg z-50">
+            <div class="p-4 border-b border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-100">Notifications</h3>
+            </div>
+            <ul id="notification-list" class="max-h-60 overflow-y-auto">
+              <!-- Notifications will be added here -->
+            </ul>
+            <div class="p-2 text-center">
+              <button id="clear-notifications" class="text-sm text-blue-400 hover:underline">Clear All</button>
+            </div>
+          </div>
+        </div>
+        <!-- Add / Remove Column Buttons -->
+        <button id="add-column-btn" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Add Column</button>
+        <button id="remove-column-btn" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Remove Column</button>
+        <!-- User Dropdown -->
+        <div class="relative">
+          <button id="user-menu-button" class="flex items-center focus:outline-none">
+            <img class="w-8 h-8 rounded-full mr-2" src="https://via.placeholder.com/32" alt="User avatar" />
+            <span>Username</span>
+            <span class="material-icons text-white">arrow_drop_down</span>
+          </button>
+          <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg z-50">
+            <ul>
+              <li>
+                <a href="#" class="block px-4 py-2 hover:bg-gray-700">Profile</a>
+              </li>
+              <li>
+                <a href="#" class="block px-4 py-2 hover:bg-gray-700">Settings</a>
+              </li>
+              <li>
+                <a href="#" class="block px-4 py-2 hover:bg-gray-700">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="flex pt-20">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 h-screen shadow-md fixed">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold mb-6">Navigation</h2>
+        <ul>
+          <li class="mb-4">
+            <a href="#" class="flex items-center text-gray-300 hover:text-blue-400">
+              <span class="material-icons mr-3">dashboard</span>
+              Dashboard
+            </a>
+          </li>
+          <!-- Additional sidebar items... -->
+        </ul>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-6">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-100">Dashboard Overview</h1>
+        <p class="text-gray-400">Real-time updates, dynamic columns, and user input via WebSockets.</p>
+      </div>
+      
+      <!-- Three Cards at the Top -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-800 p-4 rounded shadow">
+          <h3 class="text-xl font-semibold mb-2">Card One</h3>
+          <p class="text-gray-400">Some quick stats or information.</p>
+        </div>
+        <div class="bg-gray-800 p-4 rounded shadow">
+          <h3 class="text-xl font-semibold mb-2">Card Two</h3>
+          <p class="text-gray-400">More details and data.</p>
+        </div>
+        <div class="bg-gray-800 p-4 rounded shadow">
+          <h3 class="text-xl font-semibold mb-2">Card Three</h3>
+          <p class="text-gray-400">Additional information.</p>
+        </div>
+      </div>
+      
+      <!-- Table Card with Checkboxes for Mass Actions -->
+      <div class="bg-gray-800 shadow rounded-lg p-4">
+        <div class="overflow-x-auto">
+          <table id="data-table" class="min-w-full divide-y divide-gray-700">
+            <thead>
+              <tr id="table-header">
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" data-orderable="false">
+                    <input type="checkbox" id="select-all" class="form-checkbox h-4 w-4 text-blue-500" onclick="event.stopPropagation();">
+                  </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" data-column="col_a">Column A</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Progress</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-gray-700">
+              <!-- Example rows; adjust your template logic accordingly -->
+              {% for row in table_rows %}
+                <tr id="row-{{ row.id }}" class="hover:bg-gray-700">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="row-checkbox" data-row-id="{{ row.id }}" />
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm break-all">{{ row.id }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="col_a">{{ row.col_a }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                      <div class="progress-bar bg-blue-500 h-2 rounded-full" style="width: {{ row.progress }}%"></div>
+                    </div> 
+                    <button id="startTicketBtn" data-ticket-id="{{ row.id }}">Start Ticket</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mass Action Menu -->
+      <div class="mt-6 bg-gray-800 shadow rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">Mass Action Menu</h2>
+        <div class="flex space-x-4">
+          <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete Selected</button>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Export Selected</button>
+          <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Update Status</button>
+        </div>
+      </div>
+
+      <!-- User Input Form -->
+      <div class="mt-6 bg-gray-800 shadow rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">Update a Cell</h2>
+        <form id="user-input-form" class="flex flex-wrap gap-4">
+          <input type="text" id="row-id-input" placeholder="Row ID" class="border border-gray-600 bg-gray-700 p-2 rounded focus:outline-none" required>
+          <input type="text" id="column-input" placeholder="Column (e.g., col_a)" class="border border-gray-600 bg-gray-700 p-2 rounded focus:outline-none" required>
+          <input type="text" id="new-value-input" placeholder="New Value" class="border border-gray-600 bg-gray-700 p-2 rounded focus:outline-none" required>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Update Cell</button>
+        </form>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+  
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <!-- Custom JS -->
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/table.js"></script>
+  <script src="/static/js/socket.js"></script>
+</body>
+</html>

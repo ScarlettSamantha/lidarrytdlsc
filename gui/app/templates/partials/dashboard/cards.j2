@@ -1,0 +1,9 @@
+<!-- Three Cards at the Top -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  {% for card in cards %}
+  <div class="bg-gray-800 p-4 rounded shadow">
+    <h3 class="text-xl font-semibold mb-2">{{ card.title }}</h3>
+    <p class="text-gray-400">{{ card.description }}</p>
+  </div>
+  {% endfor %}
+</div>

@@ -1,0 +1,56 @@
+<div class="bg-gray-800 shadow rounded-lg p-4">
+  <div class="overflow-x-auto">
+    <table id="data-table" class="min-w-full divide-y divide-gray-700">
+      <thead>
+        <!-- Header row with column titles -->
+        <tr id="table-header">
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" data-orderable="false">
+            <input type="checkbox" id="select-all" class="form-checkbox h-4 w-4 text-blue-500"
+              onclick="event.stopPropagation();">
+          </th>
+          {% for col in table.get_columns() %}
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+              {{ col.id }}
+            </th>
+          {% endfor %}
+        </tr>
+        <!-- Filter row with dropdowns -->
+        <tr id="filter-row">
+          <th></th>
+          {% for col in table.get_columns() %}
+            <th>
+              <select class="column-filter bg-gray-700 text-white rounded px-2 py-1">
+                <option value="">All</option>
+              </select>
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody id="table-body" class="divide-y divide-gray-700">
+        {% for row in table.get_all_rows() %}
+          <tr id="row-{{ row.id }}" class="hover:bg-gray-700">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <input type="checkbox" class="row-checkbox" data-row-id="{{ row.id }}" />
+            </td>
+            {% for col in table.get_columns() %}
+              {% set cell_value = row[col.id] %}
+              <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="{{ col.id }}">
+                {% if col.raw %}
+                  {{ cell_value | safe }}
+                {% else %}
+                  {{ cell_value }}
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="{{ table.get_columns()|length + 1 }}" class="text-center p-4 text-gray-500">
+              No data available
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

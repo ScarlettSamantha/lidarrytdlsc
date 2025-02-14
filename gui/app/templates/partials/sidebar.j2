@@ -1,0 +1,15 @@
+<aside class="w-64 bg-gray-800 h-screen shadow-md fixed">
+  <div class="p-6">
+    <h2 class="text-xl font-semibold mb-6">Navigation</h2>
+    <ul>
+      {% for item in sidebar_items %}
+      <li class="mb-4">
+        <a href="{{ item.url }}" class="flex items-center text-gray-300 hover:text-blue-400">
+          <span class="material-icons mr-3">{{ item.icon }}</span>
+          {{ item.name }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</aside>

@@ -1,0 +1,19 @@
+/* styles.css */
+
+/* DataTables dark theme adjustments */
+table.dataTable thead {
+    background-color: #2d3748; /* Tailwind gray-800 */
+    color: #edf2f7; /* Tailwind gray-100 */
+  }
+  
+  table.dataTable tbody tr {
+    background-color: #1a202c; /* Tailwind gray-900 */
+    color: #edf2f7;
+  }
+  
+  table.dataTable tbody tr:hover {
+    background-color: #2d3748;
+  }
+  
+  /* Add any additional custom styles here */
+  

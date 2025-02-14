@@ -4,3 +4,14 @@ requests
 yt-dlp
 rapidfuzz
 youtube-search-python
+flask 
+flask-socketio
+flask-caching
+eventlet
+questionary
+python-slugify
+musicbrainzngs
+mutagen
+pyacoustid
+pillow
+yt

@@ -1,0 +1,19 @@
+{% extends "_base.j2" %}
+
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-100">Dashboard Overview</h1>
+  <p class="text-gray-400">Real-time updates, dynamic columns, and user input via WebSockets.</p>
+</div>
+
+{% include 'partials/dashboard/cards.j2' %}
+
+{% include 'partials/dashboard/table_container.j2'%}
+
+{% include 'partials/dashboard/user_input_menu.j2'%}
+
+{% include 'partials/dashboard/mass_action_menu.j2'%}
+
+{% endblock %}

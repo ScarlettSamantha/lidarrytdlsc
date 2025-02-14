@@ -2,6 +2,11 @@ from typing import Tuple
 from rapidfuzz import fuzz # pyright: ignore[reportMissingImports]
 import helper
 from models.video import VideoData
+import os
+import requests
+from PIL import Image
+from io import BytesIO
+
 
 def compare_video(
     query_title: str,
@@ -11,6 +16,7 @@ def compare_video(
     boost_music: int = 5,
     boost_duration: int = 5,
     boost_viewers: int = 5,
+    boost_cover: int = -10,
     min_time: int = 120,
     max_time: int = 600
 ) -> Tuple[float, str]:
@@ -54,6 +60,9 @@ def compare_video(
     # Boost if 'music' is found in the video title
     if 'music' in video_title.lower():
         score += boost_music
+        
+    if 'cover' in video_title.lower() and 'cover' not in query_title.lower():
+        score += boost_cover
 
     # Boost if the video duration is between min_time and max_time seconds
     if min_time <= duration_seconds <= max_time:
@@ -65,3 +74,6 @@ def compare_video(
 
     # Ensure the final score does not exceed 100
     return min(score, 100), video_title
+
+
+
