@@ -1,3 +1,4 @@
+import logging
 from models.video import VideoData
 from typing import Optional
 import subprocess
@@ -7,12 +8,17 @@ import requests
 from io import BytesIO
 from PIL import Image
 
+logging.basicConfig(level=logging.INFO, format="[%(name)s] | %(asctime)s.%(msecs)03d - %(levelname)s - %(message)s", datefmt='%H:%M:%S')
+logger = logging.getLogger("thumbnail")
+
 class ThumbnailDownloader:
     
-    def __init__(self, tmp_dir: str):
+    def __init__(self, tmp_dir: str, logger: logging.Logger = logger):
         self.tmp_dir: str = tmp_dir
+        self.logging: logging.Logger = logger
     
     def download_thumbnail(self, video: VideoData, output_path: str, image_source: Optional[str] = None) -> Optional[str]:
+        logging = self.logging.getChild("download")
         # If no image_source is provided, try to use the video's thumbnail.
         if image_source is None:
             thumbnail_url = None
@@ -25,7 +31,7 @@ class ThumbnailDownloader:
                 thumbnail_url = getattr(thumbnail_obj, 'url', None)
             
             if thumbnail_url:
-                print("No image source provided; attempting to use video thumbnail as cover art.")
+                logging.info("No image source provided; attempting to use video thumbnail as cover art.")
                 # Use the helper function to download and convert the image.
                 converted_path, dimensions = helper.download_and_convert_image(
                     thumbnail_url, self.tmp_dir, f"{video.id}_thumbnail.jpg"
@@ -33,7 +39,7 @@ class ThumbnailDownloader:
                 if converted_path:
                     image_source = converted_path
                 else:
-                    print("Failed to obtain a valid image source from the thumbnail.")
+                    logging.info("Failed to obtain a valid image source from the thumbnail.")
 
         # If still no image source, return None.
 
@@ -62,43 +68,44 @@ class ThumbnailDownloader:
         try:
             subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return embedded_audio  # Return the path to the new file on success.
-        except Exception as e:
-            print("Error embedding metadata/image:", e)
+        except Exception as _:
+            logging.error("Error embedding metadata/image")
             return embedded_audio  # Fallback return.
         
         
-def download_and_convert_image(url, dest_dir, dest_filename=None):
-    """
-    Downloads an image from the given URL, converts it to JPEG format (if necessary),
-    detects its dimensions, and saves it in dest_dir.
+    def download_and_convert_image(self, url, dest_dir, dest_filename=None):
+        """
+        Downloads an image from the given URL, converts it to JPEG format (if necessary),
+        detects its dimensions, and saves it in dest_dir.
 
-    :param url: URL of the image.
-    :param dest_dir: Directory where the image will be saved.
-    :param dest_filename: Optional filename for the saved image.
-    :return: Tuple (path_to_image, (width, height)) if successful; otherwise (None, (0,0)).
-    """
-    # Derive a filename if one is not provided.
-    if not dest_filename:
-        dest_filename = os.path.basename(url.split("?")[0])
-    # Ensure the filename has a .jpg extension.
-    dest_filename = os.path.splitext(dest_filename)[0] + ".jpg"
-    dest_path = os.path.join(dest_dir, dest_filename)
-    
-    try:
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-        image_data = response.content
+        :param url: URL of the image.
+        :param dest_dir: Directory where the image will be saved.
+        :param dest_filename: Optional filename for the saved image.
+        :return: Tuple (path_to_image, (width, height)) if successful; otherwise (None, (0,0)).
+        """
+        # Derive a filename if one is not provided.
+        logger = self.logging.getChild("convert_image")
+        if not dest_filename:
+            dest_filename = os.path.basename(url.split("?")[0])
+        # Ensure the filename has a .jpg extension.
+        dest_filename = os.path.splitext(dest_filename)[0] + ".jpg"
+        dest_path = os.path.join(dest_dir, dest_filename)
+        
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            image_data = response.content
 
-        # Open the image from the downloaded bytes.
-        image = Image.open(BytesIO(image_data))
-        # Convert to RGB if necessary (JPEG does not support alpha channels).
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-        width, height = image.size
-        print(f"Downloaded image dimensions: {width}x{height}")
-        # Save the image as JPEG.
-        image.save(dest_path, 'JPEG')
-        return dest_path, (width, height)
-    except Exception as e:
-        print("Error downloading or converting image:", e)
-        return None, (0, 0)
+            # Open the image from the downloaded bytes.
+            image = Image.open(BytesIO(image_data))
+            # Convert to RGB if necessary (JPEG does not support alpha channels).
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            width, height = image.size
+            logger.info(f"Downloaded image dimensions: {width}x{height}")
+            # Save the image as JPEG.
+            image.save(dest_path, 'JPEG')
+            return dest_path, (width, height)
+        except Exception as _:
+            logger.error("Error downloading or converting image")
+            return None, (0, 0)
