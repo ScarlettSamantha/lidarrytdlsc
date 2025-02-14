@@ -346,11 +346,13 @@ if __name__ == "__main__":
     if args.interactive or not args.title:
         title, audio_quality, tmp_dir, dest_dir, identify = interactive_prompt()
     else:
-        title = args.title
+        title: str = args.title
         audio_quality = args.audio_quality if args.audio_quality is not None else "320"
         tmp_dir = os.path.realpath(args.tmp_dir)
         dest_dir = os.path.realpath(args.dest_dir)
         identify = args.identify if hasattr(args, 'identify') else True
+
+    title:str = helper.strip_utf8(title.replace("\n","").lower().strip())
 
     downloader = VideoDownloader(tmp_dir=tmp_dir, dest_dir=dest_dir, try_identify=bool(identify))
     downloader.process(title)
