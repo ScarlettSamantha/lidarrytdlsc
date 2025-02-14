@@ -8,6 +8,11 @@ def fix_viewers(input: str) -> int:
 def to_youtube_url(video_id: str) -> str:
     return f"https://www.youtube.com/watch?v={video_id}"
 
+def strip_utf8(input: str | bytes) -> str:
+    if isinstance(input, bytes):
+        return input.decode('utf-8', 'ignore')
+    return input.encode('utf-8').decode('utf-8', 'ignore')
+
 def safe_copy(src: str, dest: str, chunk_size: int = 65536) -> bool:
     """
     Copies a file from 'src' to 'dest' in chunks, computing a CRC32 for the source data.
