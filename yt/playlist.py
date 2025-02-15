@@ -61,12 +61,13 @@ def parse_playlist(playlist_url: str) -> Iterable:
             if playlist_id is None:
                 return []
             playlist_url = to_youtube_playlist_url(playlist_id)
-            result = playlist_info = ydl.extract_info(url=playlist_url, download=False)
+            result = get_playlist_ids(playlist_url)
         except Exception as e:
             logger.error(f"Error extracting playlist info: {e}")
             return []
+        logger.info(f"Found {len(result)} in {playlist_url}")
 
-    if not isinstance(result, dict):
+    if not isinstance(result, list):
         logger.error("No playlist info found.")
         return []
 

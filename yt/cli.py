@@ -6,27 +6,27 @@ def interactive_prompt():
     mode = questionary.select(
         "Choose download mode:",
         choices=[
-            "Search by Title",
-            "Download by Video ID",
-            "Download Playlist"
+            "Search title",
+            "Video ID",
+            "Playlist ID"
         ]
     ).ask()
 
     # Provide a default value depending on mode.
-    if mode == "Search by Title":
+    if mode == "Search title":
         default_value = "Whiplash - Architects"
         prompt_text = "Enter video title:"
-    elif mode == "Download by Video ID":
+    elif mode == "Video ID":
         default_value = "dQw4w9WgXcQ"  # example default video ID
         prompt_text = "Enter video ID:"
-    elif mode == "Download Playlist":
+    elif mode == "Playlist ID":
         default_value = "https://www.youtube.com/playlist?list=PLXXXXXX"  # example default playlist URL
         prompt_text = "Enter playlist URL:"
     else:
         default_value = ""
         prompt_text = "Enter value:"
 
-    user_input = questionary.text(prompt_text, default=default_value).ask()
+    user_input = questionary.text(prompt_text, placeholder=default_value).ask()
 
     audio_quality_choice = questionary.select(
         "Select audio quality preset:",
