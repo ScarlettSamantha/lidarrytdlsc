@@ -3,6 +3,7 @@ import re
 from typing import Optional, Dict
 
 YOUTUBE_PLAYLIST_REGEX = re.compile(r"(?P<schema>http(s)?)\:\/\/(?P<subdomain>www|music)\.(?P<domain>youtube|yt)\.(?P<tld>com|be)\/playlist\?list\=(?P<playlist_id>\w+)(&si=(?P<some_id>\w+)|$)")
+YOUTUBE_EXTRACT_INDEX = re.compile(r"(?P<schema>\w+):\/\/(?P<subdomain>www)?\.(?P<domain>youtube|yt)\.(?P<tld>com|be)\/watch\?v\=(?P<id>\w+)$")
 
 def to_seconds(input: str) -> int:
     return (int(input.split(':')[0]) * 60) + int(input.split(':')[1])
@@ -14,10 +15,14 @@ def fix_viewers(input: str) -> int:
         return 0
 
 def to_youtube_url(video_id: str) -> str:
+    if video_id.startswith("http"):
+        return video_id
     return f"https://www.youtube.com/watch?v={video_id}"
 
 
 def to_youtube_playlist_url(playlist_id: str) -> str:
+    if playlist_id.startswith("http"):
+        return playlist_id
     return f"https://www.youtube.com/playlist?list={playlist_id}"
 
 def strip_utf8(input: str | bytes) -> str:
@@ -40,6 +45,11 @@ def parse_youtube_playlist_url(url: str) -> Optional[Dict[str, str]]:
         return match.groupdict()
     return None
 
+def parse_youtube_url_to_id(url: str) -> Optional[str]:
+    regex_result = YOUTUBE_EXTRACT_INDEX.match(url)
+    if regex_result:
+        return regex_result.groupdict()['id']
+    return None
 
 def parse_youtube_playlist_url_to_id(url: str) -> Optional[str]:
     regex_result = parse_youtube_playlist_url(url)
