@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import json
 import random
+from youtubesearchpython import Video
 import yt_dlp
 import helper 
 import dotenv
@@ -13,11 +14,12 @@ from playlist import parse_playlist
 from os import environ
 from score import compare_video
 from models.video import VideoData
-from typing import Optional, Tuple, List
+from typing import Generator, Optional, Tuple, List
 from thumbnail import ThumbnailDownloader
 from os.path import join, realpath, dirname
 from identify import detect_and_update_tags
 from search import search_youtube_unofficial
+from helper import parse_youtube_url_to_id
 
 # Monkey-patch httpx to remove the 'proxies' argument, fixing the error in youtubesearchpython.
 import httpx
@@ -295,6 +297,37 @@ class VideoDownloader:
             self.logger.warning(f"No destination directory specified. Audio file remains in temporary folder: {downloaded_file}")
             return downloaded_file
 
+def download_video_by_id(_id: str) -> Generator[Tuple[bool, VideoData], None, None]:
+    from models.video import VideoData
+    video = VideoData(id=_id, title=f"Video {_id}", link=helper.to_youtube_url(_id))
+    success = downloader.download_audio(video, audio_quality=audio_quality)
+    if success:
+        if downloader.try_identify:
+            detect_and_update_tags(downloader.tmp_file_path)
+        if dest_dir or downloader.dest_dir:
+            final_name = video.title + ".mp3"
+            try:
+                final_path = downloader.move_audio(downloader.tmp_file_path, dest_dir, final_name, folder_based=True)
+                logger.info(f"Downloaded and moved: {final_path}")
+            except Exception as e:
+                logger.error(f"Failed to move audio file for video {video.title}: {e}")
+        else:
+            logger.info(f"Downloaded: {downloader.tmp_file_path}")
+    else:
+        logger.error(f"Download failed for video {video.title}")
+    yield True, video
+
+def process_playlist_into_ids(_id: str) -> Generator[VideoData, None, None]:
+    entries = parse_playlist(_id)
+    if not entries or not isinstance(entries, list):
+            logger.error("No entries found in the playlist.")
+    else:
+        for entry in entries:
+            video_id = entry
+            if not video_id:
+                logger.warning("Skipping an entry with no video ID.")
+                continue
+            yield VideoData(id=video_id, url=helper.to_youtube_url(video_id), link=helper.to_youtube_url(video_id))
 
 if __name__ == "__main__":
     from cli import interactive_prompt
@@ -308,7 +341,7 @@ if __name__ == "__main__":
     parser.add_argument("--interactive", action="store_true", help="Run interactive CLI mode")
     parser.add_argument("--identify", action="store_true", default=True, help="Attempt to correct tags and identify the song (default: True)")
     parser.add_argument("--mode", type=str, 
-                        choices=["Search by Title", "Download by Video ID", "Download Playlist"],
+                        choices=["Video Search", "Video ID", "Playlist Link"],
                         default="Search by Title", 
                         help="Mode to run the downloader in")
     args = parser.parse_args()
@@ -327,42 +360,32 @@ if __name__ == "__main__":
 
     downloader = VideoDownloader(tmp_dir=tmp_dir, dest_dir=dest_dir, try_identify=bool(identify))
 
-    if mode == "Search by Title":
+    if mode == "Search Title":
         downloader.process(value)
-    elif mode == "Download by Video ID":
-        from models.video import VideoData
-        video = VideoData(id=value, title=f"Video {value}", url=helper.to_youtube_url(value))
-        downloader.download_audio(video, audio_quality=audio_quality)
-    elif mode == "Download Playlist":
-        # First parse the playlist to retrieve its entries
-        entries = parse_playlist(value)
-        if not entries or not isinstance(entries, dict):
-            logger.error("No entries found in the playlist.")
+    elif mode == "Video ID":
+        _id: str
+        if value is not None and value.startswith("http"):
+            parsed_id = parse_youtube_url_to_id(value)
+            if parsed_id is None:
+                logger.error("Not a valid youtube url")
+                os._exit(1)
+            _id = parsed_id
         else:
-            for entry in entries["entries"]:
-                video_id = entry["id"]
-                if not video_id:
-                    logger.warning("Skipping an entry with no video ID.")
+            _id = value
+        data: Optional[VideoData] = VideoData(id=_id, title=_id, link=value)
+        for x in download_video_by_id(value):
+            data = x[1]
+        if data:
+            logger.info(f"Video {data.title}@{data.link} has been downloaded")
+        else:
+            logger.error("No video data was received")
+            os._exit(1)
+
+    elif mode == "Playlist ID":
+        # First parse the playlist to retrieve its entries
+        for video in process_playlist_into_ids(value):
+            for success, videoData in download_video_by_id(video.id):
+                if not success:
+                    logger.warning(f"Error {video.title} is invalid...skip")
                     continue
-                # Create a minimal VideoData object
-                from models.video import VideoData
-                video = VideoData(
-                    id=video_id,  
-                    url=helper.to_youtube_url(video_id),
-                    link=helper.to_youtube_url(video_id)
-                )
-                success = downloader.download_audio(video, audio_quality=audio_quality)
-                if success:
-                    if downloader.try_identify:
-                        detect_and_update_tags(downloader.tmp_file_path)
-                    if dest_dir or downloader.dest_dir:
-                        final_name = video.title + ".mp3"
-                        try:
-                            final_path = downloader.move_audio(downloader.tmp_file_path, dest_dir, final_name, folder_based=True)
-                            logger.info(f"Downloaded and moved: {final_path}")
-                        except Exception as e:
-                            logger.error(f"Failed to move audio file for video {video.title}: {e}")
-                    else:
-                        logger.info(f"Downloaded: {downloader.tmp_file_path}")
-                else:
-                    logger.error(f"Download failed for video {video.title}")
+    os._exit(0)
