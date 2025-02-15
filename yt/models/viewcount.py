@@ -5,6 +5,12 @@ from typing import List, Dict, Any
 class ViewCount:
     short: str
     text: str
+    
+    def __todict__(self):
+        return {
+            "short": self.short,
+            "text": self.text
+        }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ViewCount":

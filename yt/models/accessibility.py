@@ -6,6 +6,12 @@ class Accessibility:
     duration: str
     title: str
 
+    def __todict__(self):
+        return {
+            "duration": self.duration,
+            "title": self.title
+        }
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Accessibility":
         """

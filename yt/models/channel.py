@@ -12,6 +12,14 @@ class Channel:
     name: str
     thumbnails: List["Thumbnail"]
     
+    def __todict__(self):
+        return {
+            "id": self.id,
+            "link": self.link,
+            "name": self.name,
+            "thumbnails": [t.__todict__() for t in self.thumbnails]
+        }
+    
     @classmethod
     def parse_channel(cls, channel_dict: dict) -> "Channel":
         from models.thumbnail import Thumbnail

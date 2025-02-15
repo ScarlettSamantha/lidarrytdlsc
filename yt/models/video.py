@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Dict, Any
 
 if TYPE_CHECKING:
         from models.accessibility import Accessibility
@@ -36,6 +36,23 @@ class VideoData:
             f"richThumbnail={self.richThumbnail!r}, shelfTitle={self.shelfTitle!r}"
             f")"
         )
+        
+    def __todict__(self) -> Dict[str, Any]:
+        return {
+            "accessibility": self.accessibility.__todict__(),
+            "channel": self.channel.__todict__(),
+            'descriptionSnippet': [part.__todict__() for part in self.descriptionSnippet],
+            'duration':self.duration,
+            'id':self.id,
+            'link':self.link,
+            'publishedTime':self.publishedTime,
+            'richThumbnail':self.richThumbnail,
+            'shelfTitle':self.shelfTitle,
+            'thumbnails':[thumb.__todict__() for thumb in self.thumbnails],
+            'title':self.title,
+            'type':':self.type',
+            'viewCount':self.viewCount.__todict__()
+        }
     
     @classmethod
     def parse_video_data(cls, data: dict) -> "VideoData":
