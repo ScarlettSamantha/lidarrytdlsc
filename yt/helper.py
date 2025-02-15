@@ -1,17 +1,51 @@
 
+import re
+from typing import Optional, Dict
+
+YOUTUBE_PLAYLIST_REGEX = re.compile(r"(?P<schema>http(s)?)\:\/\/(?P<subdomain>www|music)\.(?P<domain>youtube|yt)\.(?P<tld>com|be)\/playlist\?list\=(?P<playlist_id>\w+)(&si=(?P<some_id>\w+)|$)")
+
 def to_seconds(input: str) -> int:
     return (int(input.split(':')[0]) * 60) + int(input.split(':')[1])
 
 def fix_viewers(input: str) -> int:
-    return int(input.split(' ')[0].replace(',', ''))
+    try:
+        return int(input.split(' ')[0].replace(',', ''))
+    except ValueError:
+        return 0
 
 def to_youtube_url(video_id: str) -> str:
     return f"https://www.youtube.com/watch?v={video_id}"
+
+
+def to_youtube_playlist_url(playlist_id: str) -> str:
+    return f"https://www.youtube.com/playlist?list={playlist_id}"
 
 def strip_utf8(input: str | bytes) -> str:
     if isinstance(input, bytes):
         return input.decode('utf-8', 'ignore')
     return input.encode('utf-8').decode('utf-8', 'ignore')
+
+
+def parse_youtube_playlist_url(url: str) -> Optional[Dict[str, str]]:
+    """Parses a YouTube playlist URL and extracts relevant groups.
+
+    Args:
+        url (str): The YouTube playlist URL.
+
+    Returns:
+        Optional[Dict[str, str]]: A dictionary of extracted groups or None if no match.
+    """
+    match = YOUTUBE_PLAYLIST_REGEX.match(url)
+    if match:
+        return match.groupdict()
+    return None
+
+
+def parse_youtube_playlist_url_to_id(url: str) -> Optional[str]:
+    regex_result = parse_youtube_playlist_url(url)
+    if not regex_result:
+        return None
+    return regex_result['playlist_id']
 
 def safe_copy(src: str, dest: str, chunk_size: int = 65536) -> bool:
     """
