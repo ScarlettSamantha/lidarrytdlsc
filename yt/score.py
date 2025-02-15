@@ -41,7 +41,7 @@ def compare_video(
     penalty_pointless_words: int = 10,# - per occurrence for "slowed", "reverb", etc.
     penalty_reaction: int = 100,      # - per occurrence for reaction/analysis keywords
     boost_lyrics: int = 10,           # + when lyric-related keywords appear (applied once)
-    boost_per_10000: float = 0.01,    # + (views / 10,000 * this)
+    boost_per_10000: float = 0.03,    # + (views / 10,000 * this)
     boost_official_named_channel: int = 20,  # + if channel name is in the title (applied once)
     boost_age_factor: float = 0.5,    # + per year old the video is
     # New parameter for the title format boost:
@@ -75,7 +75,7 @@ def compare_video(
     video_title = re.sub(r"[^a-zA-Z0-9\s]+", "", ascii_only).lower()
 
     duration_seconds = helper.to_seconds(video.duration)
-    views = helper.fix_viewers(video.viewCount.text)
+    views = helper.fix_viewers(video.viewCount.text if video.viewCount else "0")
 
     score_steps: List[dict] = []
     logger.debug("Comparing query_title=%r with video_title=%r", query_title, video_title)
@@ -245,7 +245,7 @@ def compare_video(
         })
 
     # --- Boost: Channel name in title ---
-    if any(word.lower() in video.channel.name.lower() for word in video_title.split()):
+    if video.channel and any(word.lower() in video.channel.name.lower() for word in video_title.split()):
         score += boost_official_named_channel
         score_steps.append({
             "step": "Channel boost",
