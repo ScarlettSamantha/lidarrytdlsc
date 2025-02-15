@@ -1,29 +1,30 @@
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Optional, Dict, Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, List, Optional, Dict
 
 if TYPE_CHECKING:
-        from models.accessibility import Accessibility
-        from models.channel import Channel
-        from models.description_snippit_part import DescriptionSnippetPart
-        from models.thumbnail import Thumbnail
-        from models.viewcount import ViewCount
+    from models.accessibility import Accessibility
+    from models.channel import Channel
+    from models.description_snippit_part import DescriptionSnippetPart
+    from models.thumbnail import Thumbnail
+    from models.viewcount import ViewCount
 
 @dataclass
 class VideoData:
-    accessibility: "Accessibility"
-    channel: "Channel"
-    descriptionSnippet: List["DescriptionSnippetPart"]
-    duration: str
-    id: str
-    link: str
-    publishedTime: Optional[str]
-    richThumbnail: Optional["Thumbnail"]
-    shelfTitle: Optional[str]
-    thumbnails: List["Thumbnail"]
-    title: str
-    type: str
-    viewCount: "ViewCount"
-    
+    accessibility: Optional["Accessibility"] = None
+    channel: Optional["Channel"] = None
+    descriptionSnippet: List["DescriptionSnippetPart"] = field(default_factory=list)
+    duration: str = ""
+    id: str = ""
+    link: str = ""
+    publishedTime: Optional[str] = ""
+    richThumbnail: Optional["Thumbnail"] = None
+    shelfTitle: Optional[str] = ""
+    thumbnails: List["Thumbnail"] = field(default_factory=list)
+    title: str = ""
+    type: str = ""
+    viewCount: Optional["ViewCount"] = None
+    url: Optional[str] = ""
+
     def __repr__(self) -> str:
         desc_count = len(self.descriptionSnippet)
         thumbs_count = len(self.thumbnails)
@@ -39,19 +40,20 @@ class VideoData:
         
     def __todict__(self) -> Dict[str, Any]:
         return {
-            "accessibility": self.accessibility.__todict__(),
-            "channel": self.channel.__todict__(),
-            'descriptionSnippet': [part.__todict__() for part in self.descriptionSnippet],
-            'duration':self.duration,
-            'id':self.id,
-            'link':self.link,
-            'publishedTime':self.publishedTime,
-            'richThumbnail':self.richThumbnail,
-            'shelfTitle':self.shelfTitle,
-            'thumbnails':[thumb.__todict__() for thumb in self.thumbnails],
-            'title':self.title,
-            'type':':self.type',
-            'viewCount':self.viewCount.__todict__()
+            "accessibility": self.accessibility.__todict__() if self.accessibility else None,
+            "channel": self.channel.__todict__() if self.channel else None,
+            "descriptionSnippet": [part.__todict__() for part in self.descriptionSnippet],
+            "duration": self.duration,
+            "id": self.id,
+            "link": self.link,
+            "publishedTime": self.publishedTime,
+            "richThumbnail": self.richThumbnail.__todict__() if self.richThumbnail else None,
+            "shelfTitle": self.shelfTitle,
+            "thumbnails": [thumb.__todict__() for thumb in self.thumbnails],
+            "title": self.title,
+            "type": self.type,
+            "viewCount": self.viewCount.__todict__() if self.viewCount else None,
+            "url": self.url
         }
     
     @classmethod
@@ -65,7 +67,9 @@ class VideoData:
              
         accessibility = Accessibility(**data['accessibility'])
         channel = Channel.parse_channel(data['channel'])
-        description_snippet = DescriptionSnippetPart.parse_description_snippet(data['descriptionSnippet'] if data['descriptionSnippet'] is not None else [])
+        description_snippet = DescriptionSnippetPart.parse_description_snippet(
+            data.get('descriptionSnippet') or []
+        )
         thumbnails = [Thumbnail.parse_thumbnail(t) for t in data.get('thumbnails', [])]
         view_count = ViewCount(**data['viewCount'])
         
@@ -77,10 +81,11 @@ class VideoData:
             id=data['id'],
             link=data['link'],
             publishedTime=data.get('publishedTime'),
-            richThumbnail=data.get('richThumbnail'),
+            richThumbnail=Thumbnail.parse_thumbnail(data['richThumbnail']) if data.get('richThumbnail') else None,
             shelfTitle=data.get('shelfTitle'),
             thumbnails=thumbnails,
             title=data['title'],
             type=data['type'],
-            viewCount=view_count
+            viewCount=view_count,
+            url=data['url'] if 'url' in data.keys() else None
         )
